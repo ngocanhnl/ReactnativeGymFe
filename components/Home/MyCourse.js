@@ -71,7 +71,7 @@ const Mycourse = () => {
         // if (!loading && page > 0)
         //     setPage(page + 1);
     }
-    console.log(courses);
+    // console.log(courses);
     return (
         <View style={styles.container}>
             {/* <View style={styles.header}>

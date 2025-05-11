@@ -119,9 +119,9 @@ export default function Lessons({ route }) {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem('token');
-        console.log('token', token)
+        // console.log('token', token)
         let u = await authApis(token).post(endpoints['lesson-done'](lessonId));
-        console.info('lesondone', u.data)
+        // console.info('lesondone', u.data)
 
         setCompletedLessons((prev) =>
           prev.includes(lessonId)
@@ -215,7 +215,7 @@ export default function Lessons({ route }) {
       <Text style={{ fontSize: 22, fontWeight: '700', margin: 20, marginBottom: 10 }}>
         Lộ trình khóa học
       </Text>
-      {console.log(lessons)}
+      {/* {console.log(lessons)} */}
 
     {lessons.map((lesson, i) => (
     <View key={`lesson-${lesson.id}`} style={{ marginBottom: 2 }}>

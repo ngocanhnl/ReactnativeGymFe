@@ -85,9 +85,9 @@ const LessonDetails = ({ route }) => {
         // Dữ liệu khóa học
         const addStudent = async ()=>{
           const token = await AsyncStorage.getItem('token');
-          console.log('token', token)
+          // console.log('token', token)
           let u = await authApis(token).post(endpoints['add-student'](courseId));
-          console.info('Add Student',u.data);
+          // console.info('Add Student',u.data);
       
 
 

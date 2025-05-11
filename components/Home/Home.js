@@ -34,7 +34,7 @@ const Home = () => {
                     url = `${url}&category_id=${cateId}`;
                 }
     
-                console.info(url);
+                // console.info(url);
                 let res = await Apis.get(url);
                 setCourses([...courses, ...res.data.results]);
     
@@ -69,7 +69,7 @@ const Home = () => {
         if (!loading && page > 0)
             setPage(page + 1);
     }
-    console.log(courses);
+    // console.log(courses);
     return (
         <View style={styles.container}>
             <View style={styles.header}>
