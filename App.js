@@ -14,6 +14,12 @@ import Profile from "./components/User/Profile";
 import MyCourse from "./components/Home/MyCourse"
 import Apointment from "./components/Home/Apointment"
 import Chat from "./components/Home/Chat"
+import NewFeeds from "./components/Home/NewFeeds"
+import Payment from "./components/Home/Payment"
+import VNPayWebView from "./components/Home/VNPayWebView"
+import PaymentSuccess from "./components/Home/PaymentSuccessScreen"
+import PaymentFailed from "./components/Home/PaymentFailedScreen"
+
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +30,10 @@ const StackNavigator = () => {
       <Stack.Screen name="lessons" component={Lessons} options={{title: "Danh sách bài học"}} />
       <Stack.Screen name="course-details" component={CourseDetails} options={{title: "Chi tiết bài học"}} />
       <Stack.Screen name="apointment" component={Apointment} />
+      <Stack.Screen name="payment" component={Payment} />
+      <Stack.Screen name="VNPayWebView" component={VNPayWebView} />
+      <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+      <Stack.Screen name="PaymentFailed" component={PaymentFailed} />
       {/* <Stack.Screen name="myCourse" component={MyCourse} options={{title: "My Courses"}} /> */}
     </Stack.Navigator>
   );
@@ -35,6 +45,7 @@ const MyCourseStackScreen = () => (
     <MyCourseStack.Screen name="lessons" component={Lessons} />
     <MyCourseStack.Screen name="apointment" component={Apointment} />
     <MyCourseStack.Screen name="chat" component={Chat} />
+    <MyCourseStack.Screen name="newfeeds" component={NewFeeds} />
   </MyCourseStack.Navigator>
 );
 const Tab = createBottomTabNavigator();

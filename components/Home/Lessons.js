@@ -196,22 +196,44 @@ export default function Lessons({ route }) {
       </List.Accordion>
       
     )}
+    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 16, marginBottom: 10 }}>
     <TouchableOpacity
-  onPress={() => {
-    nav.navigate('chat', {
-      groupId: courseId,
-    });
-  }}
-  style={{
-    backgroundColor: '#28a745',
-    padding: 12,
-    marginHorizontal: 16,
-    borderRadius: 6,
-    marginBottom: 10,
-  }}
->
-  <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>Vào nhóm chat</Text>
-</TouchableOpacity>
+      onPress={() => {
+        nav.navigate('chat', {
+          groupId: courseId,
+        });
+      }}
+      style={{
+        flex :1,
+        backgroundColor: '#28a745',
+        padding: 12,
+        marginHorizontal: 16,
+        borderRadius: 6,
+        marginBottom: 10,
+      }}
+    >
+      <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>Vào nhóm chat</Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+    onPress={() => {
+      nav.navigate('newfeeds', {
+        courseId: courseId,
+      });
+    }}
+    style={{
+      flex :1,
+      backgroundColor: '#28a745',
+      padding: 12,
+      marginHorizontal: 16,
+      borderRadius: 6,
+      marginBottom: 10,
+    }}
+  >
+    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>New feed</Text>
+  </TouchableOpacity>
+
+    </View>
+    
       <Text style={{ fontSize: 22, fontWeight: '700', margin: 20, marginBottom: 10 }}>
         Lộ trình khóa học
       </Text>

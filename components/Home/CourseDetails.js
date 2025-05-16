@@ -244,8 +244,8 @@ const LessonDetails = ({ route }) => {
                     icon="book-check"
                     onPress={async () => {
                       try {
-                        await addStudent(); // đợi API hoàn thành
-                        nav.navigate('lessons', { courseId: courseDetails?.id });
+                        // await addStudent(); // đợi API hoàn thành
+                        nav.navigate('payment', { amount: courseDetails?.price });
                       } catch (err) {
                         console.error('Lỗi khi thêm học viên:', err);
                         Alert.alert('Lỗi', 'Không thể đăng ký khóa học. Vui lòng thử lại.');
