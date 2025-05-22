@@ -10,6 +10,7 @@ import { MyDispatchContext } from "../../configs/Contexts";
 import { auth, db  } from '../../firebase'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
+import{registerForPushNotificationsAsync} from '../../utils/notifications'
 
 const Login = () => {
     const info = [{
@@ -32,6 +33,7 @@ const Login = () => {
     const setState = (value, field) => {
         setUser({...user, [field]: value});
     }
+
 
     const validate = () => {
         if (Object.values(user).length === 0) {
@@ -61,7 +63,7 @@ const Login = () => {
                     grant_type: "password"
                 });
                 await AsyncStorage.setItem('token', res.data.access_token);
-                
+                registerForPushNotificationsAsync(res.data.access_token);
 
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
                 await AsyncStorage.setItem('user-detail', JSON.stringify(u.data));

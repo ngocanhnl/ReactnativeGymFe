@@ -2,7 +2,7 @@ import axios from "axios";
 
 // const BASE_URL = "http://10.0.2.2:8000/";
 // const BASE_URL = "http://192.168.100.9:8000/";
-const BASE_URL = "https://a999-2001-ee0-4f01-2ec0-206e-70d2-cbc9-2008.ngrok-free.app/";
+const BASE_URL = "https://b0ed-2001-ee0-4f01-2ec0-8928-3f0b-6157-2f2d.ngrok-free.app/";
 
 export const endpoints = {
     'categories': '/categories/',
@@ -20,6 +20,7 @@ export const endpoints = {
     'chat': (courseId) => `/courses/${courseId}/chats`,
     'news': (courseId) => `/courses/${courseId}/news/`,
     'vnpay-return': `/payment/vnpay-return/`,
+    'order': `/order/`,
 
 }
 

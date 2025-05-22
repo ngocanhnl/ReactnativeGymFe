@@ -23,6 +23,19 @@ import PaymentFailed from "./components/Home/PaymentFailedScreen"
 
 const Stack = createNativeStackNavigator();
 
+import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,  // QUAN TRỌNG: hiển thị thông báo khi app đang mở
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+
+
 const StackNavigator = () => {
   return (
     <Stack.Navigator>
@@ -71,7 +84,12 @@ const TabNavigator = () => {
 
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
- 
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(notification => {
+      console.log('📩 Thông báo nhận được:', notification);
+    } )
+    return () => subscription.remove();
+ })
   return (
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>

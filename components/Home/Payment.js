@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { PaymentService } from '../../service/paymentServiec';
+import Apis, { authApis, endpoints } from "../../configs/Apis";
 
 const PaymentScreen = ({ navigation, route }) => {
   const { amount, orderId } = route.params;
   const [loading, setLoading] = useState(false);
-  
+  const [order_id, SetOrderID] = useState()
+  const courseId = route.params?.courseId;
+  console.log("CourseHande", courseId)
   const handlePayment = async () => {
+    
     try {
       setLoading(true);
+
+      const order = await Apis.post(endpoints['order'], {
+        course: courseId,
+        user: 7
+      },  {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log("Order", order.data)
       
       // Call API to create payment URL
-      const response = await PaymentService.createPayment(amount);
+      const response = await PaymentService.createPayment(amount,order.data.id);
       
       if (response && response.status === 'success') {
         // Navigate to WebView with payment URL

@@ -2,6 +2,11 @@
   "expo": {
     "name": "ecourcemobileappv2",
     "slug": "ecourcemobileappv2",
+    "extra": {
+      "eas": {
+        "projectId": "ad757977-ceb6-4c07-8af4-cf3e460800d8"
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +28,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "bangjame2004"
   }
 }

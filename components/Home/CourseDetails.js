@@ -37,11 +37,14 @@ const LessonDetails = ({ route }) => {
     const [loading, setLoading] = useState(true); // Theo dõi trạng thái tải
     const [error, setError] = useState(null); // Theo dõi lỗi
     const [lessons, setLessons] = useState([]);
+    const [students, setStudents] = useState()
     const courseId = route.params?.courseId;
     let course = {}
     const nav = useNavigation();
     const user = useContext(MyUserContext);
     const dispatch = useContext(MyDispatchContext);
+    
+    console.log("User Course detail", user)
     // console.log('param', route.params);
     const loadLessons = async () => {
       try {
@@ -59,6 +62,8 @@ const LessonDetails = ({ route }) => {
         const res = await Apis.get(endpoints['course-detail'](courseId));
         loadLessons()
         setCourseDetails(res.data);
+        setStudents(res.data.students)
+        console.log("student", res.data.students)
       } catch (e) {
         console.error(e);
       } finally {
@@ -68,7 +73,9 @@ const LessonDetails = ({ route }) => {
        
     };
 
-  
+    function checkUserExists(userId, userList) {
+      return userList?.some(user => user?.id === userId);
+    }
     
 
     useEffect(() => {
@@ -83,15 +90,15 @@ const LessonDetails = ({ route }) => {
         const scrollRef = useRef(null);
       
         // Dữ liệu khóa học
-        const addStudent = async ()=>{
-          const token = await AsyncStorage.getItem('token');
-          // console.log('token', token)
-          let u = await authApis(token).post(endpoints['add-student'](courseId));
-          // console.info('Add Student',u.data);
+        // const addStudent = async ()=>{
+        //   const token = await AsyncStorage.getItem('token');
+        //   // console.log('token', token)
+        //   let u = await authApis(token).post(endpoints['add-student'](courseId));
+        //   // console.info('Add Student',u.data);
       
 
 
-        }
+        // }
       
         const courseImages = [
           'https://source.unsplash.com/600x400/?yoga',
@@ -206,6 +213,14 @@ const LessonDetails = ({ route }) => {
             ))} */}
           </View>
         );
+        // if (loading || !user || !courseDetails) {
+        //   return (
+        //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        //       <Text>Đang tải dữ liệu...</Text>
+        //     </View>
+        //   );
+        // }
+        
       
         return (
           <KeyboardAvoidingView
@@ -238,25 +253,65 @@ const LessonDetails = ({ route }) => {
                     📅 Ket thuc: <Text style={{ fontWeight: 'bold' }}>{courseDetails?.end_date||'Ngay kt'}</Text>
                   </Text>
                 </Card.Content>
-                <Card.Actions style={{ justifyContent: 'center', marginTop: 10 }}>
+              
+                {/* <Card.Actions style={{ justifyContent: 'center', marginTop: 10 }}>
                   <Button
                     mode="contained"
                     icon="book-check"
-                    onPress={async () => {
-                      try {
-                        // await addStudent(); // đợi API hoàn thành
-                        nav.navigate('payment', { amount: courseDetails?.price });
-                      } catch (err) {
-                        console.error('Lỗi khi thêm học viên:', err);
-                        Alert.alert('Lỗi', 'Không thể đăng ký khóa học. Vui lòng thử lại.');
-                      }
-                    }}
-                    
+                    onPress={
+                      checkUserExists(user?.id, students)
+                        ? null
+                        : async () => {
+                            try {
+                              await AsyncStorage.setItem('courseID', courseId);
+                              nav.navigate('payment', {
+                                amount: courseDetails?.price,
+                                courseId: courseId,
+                              });
+                            } catch (err) {
+                              console.error('Lỗi khi thêm học viên:', err);
+                              Alert.alert('Lỗi', 'Không thể đăng ký khóa học. Vui lòng thử lại.');
+                            }
+                          }
+                    }
+                    disabled={checkUserExists(user?.id, students)}
                     contentStyle={{ paddingHorizontal: 20, paddingVertical: 5 }}
                   >
-                    Đăng ký ngay
+                    {checkUserExists(user?.id, students) ? 'Đã mua' : 'Đăng ký ngay'}
                   </Button>
-                </Card.Actions>
+                </Card.Actions> */}
+                <Card.Actions style={{ justifyContent: 'center', marginTop: 10 }}>
+                <Button
+                  mode="contained"
+                  icon="book-check"
+                  onPress={async () => {
+                    if (!user) {
+                      nav.navigate('login'); // Chuyển đến màn hình đăng nhập nếu chưa đăng nhập
+                      return;
+                    }
+
+                    if (checkUserExists(user?.id, students)) {
+                      return; // Không làm gì nếu người dùng đã mua khóa học
+                    }
+
+                    try {
+                      await AsyncStorage.setItem('courseID', courseId.toString()); // Lưu courseID nếu cần
+                      nav.navigate('payment', {
+                        amount: courseDetails?.price,
+                        courseId: courseId,
+                      });
+                    } catch (err) {
+                      console.error('Lỗi khi thêm học viên:', err);
+                      Alert.alert('Lỗi', 'Không thể đăng ký khóa học. Vui lòng thử lại.');
+                    }
+                  }}
+                  disabled={checkUserExists(user?.id, students)}
+                  contentStyle={{ paddingHorizontal: 20, paddingVertical: 5 }}
+                >
+                  {checkUserExists(user?.id, students) ? 'Đã mua' : 'Đăng ký ngay'}
+                </Button>
+              </Card.Actions>
+
               </Card>
       
               <Divider style={{ marginVertical: 16 }} />

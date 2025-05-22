@@ -141,7 +141,7 @@
 
 // export default VNPayWebView;
 
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from 'react';
 import { ActivityIndicator, View, Text, StyleSheet, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -153,11 +153,26 @@ const VNPayWebView = ({ route }) => {
   const [error, setError] = useState(null);
   const navigation = useNavigation();
 
+
+  const addStudent = async ()=>{
+    const token = await AsyncStorage.getItem('token');
+    const courseId = await AsyncStorage.getItem('courseID');
+    console.log('token', token)
+    console.log('courseId', courseId)
+    let u = await authApis(token).post(endpoints['add-student'](courseId));
+    // console.info('Add Student',u.data);
+
+
+
+  }
+
+
   const handleShouldStartLoadWithRequest = (request) => {
     if (request.url.includes('/payment/vnpay-return')) {
       const urlParams = request.url.split('?')[1];
       const apiUrl = `${endpoints['vnpay-return']}?${urlParams}`;
-
+      console.log("123333")
+      console.log("urlWBV", apiUrl)
       // Gọi API backend (không cần await)
       Apis.get(apiUrl).catch(err => {
         console.warn('Lỗi gọi API vnpay-return:', err);
@@ -168,6 +183,8 @@ const VNPayWebView = ({ route }) => {
       const responseCode = searchParams.get('vnp_ResponseCode');
 
       if (responseCode === '00') {
+        addStudent()
+
         Alert.alert(
           'Thanh toán thành công',
           'Cảm ơn bạn đã thanh toán.',
