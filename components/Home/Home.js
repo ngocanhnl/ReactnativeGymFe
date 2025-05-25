@@ -1,7 +1,7 @@
 import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import MyStyles from "../../styles/MyStyles";
 import { useEffect, useState } from "react";
-import { Chip, List, Searchbar } from "react-native-paper";
+import { Chip, List, Searchbar, Card, Avatar, Divider, IconButton } from "react-native-paper";
 import Apis, { endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
 
@@ -111,22 +111,63 @@ const Home = () => {
                 ListFooterComponent={loading && <ActivityIndicator size={30} />} 
                 data={courses} 
                 renderItem={({item}) => (
-                    // console.log('item',item),
-                    <TouchableOpacity 
-                        style={styles.courseItem}
+                    <Card 
+                        style={styles.courseCard}
                         onPress={() => nav.navigate('course-details', {'courseId': item.id})}
                     >
-                        <Image 
-                            style={styles.courseImage} 
-                            source={{uri: item.image}} 
-                        />
-                        <View style={styles.courseInfo}>
-                            <Text style={styles.courseTitle}>{item.name}</Text>
-                            <Text style={styles.courseDate}>{item.start_date}</Text>
-                            <Text style={styles.courseDate}>{item.end_date}</Text>
-                            <Text style={styles.courseDate}>{item.capacity} Hoc Vien</Text>
-                        </View>
-                    </TouchableOpacity>
+                        <Card.Cover source={{uri: item.image}} style={styles.courseImage} />
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.courseTitle} numberOfLines={2}>{item.name}</Text>
+                            
+                            <View style={styles.priceContainer}>
+                                {item.best_active_discount ? (
+                                    <>
+                                        <Text style={styles.originalPrice}>
+                                            {item.price.toLocaleString('vi-VN')}đ
+                                        </Text>
+                                        <Text style={styles.discountedPrice}>
+                                            {(item.price * (1 - item.best_active_discount.discount_percentage/100)).toLocaleString('vi-VN')}đ
+                                        </Text>
+                                        <Chip 
+                                            style={styles.discountChip}
+                                            textStyle={styles.discountChipText}
+                                        >
+                                            -{item.best_active_discount.discount_percentage}%
+                                        </Chip>
+                                    </>
+                                ) : (
+                                    <Text style={styles.price}>
+                                        {item.price.toLocaleString('vi-VN')}đ
+                                    </Text>
+                                )}
+                            </View>
+
+                            <View style={styles.infoContainer}>
+                                <View style={styles.infoItem}>
+                                    <IconButton icon="account-group" size={16} />
+                                    <Text style={styles.infoText}>
+                                        {item.students.length}/{item.capacity} học viên
+                                    </Text>
+                                </View>
+                                <View style={styles.infoItem}>
+                                    <IconButton icon="calendar" size={16} />
+                                    <Text style={styles.infoText}>
+                                        {new Date(item.start_date).toLocaleDateString('vi-VN')} - {new Date(item.end_date).toLocaleDateString('vi-VN')}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.teacherContainer}>
+                                <Avatar.Image 
+                                    size={24} 
+                                    source={{uri: item.teacher.avatar || 'https://via.placeholder.com/24'}} 
+                                />
+                                <Text style={styles.teacherName}>
+                                    Giảng viên: {item.teacher.first_name}
+                                </Text>
+                            </View>
+                        </Card.Content>
+                    </Card>
                 )} 
             />
         </View>
@@ -183,40 +224,73 @@ const styles = StyleSheet.create({
     courseList: {
         padding: 16,
     },
-    courseItem: {
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        borderRadius: 12,
-        marginBottom: 12,
-        padding: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+    courseCard: {
+        marginBottom: 16,
+        elevation: 4,
     },
     courseImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 8,
-        marginRight: 12,
+        height: 200,
     },
-    courseInfo: {
-        flex: 1,
-        justifyContent: 'center',
+    cardContent: {
+        padding: 16,
     },
     courseTitle: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: 'bold',
         color: '#333',
+        marginBottom: 8,
+    },
+    priceContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    originalPrice: {
+        fontSize: 16,
+        color: '#666',
+        textDecorationLine: 'line-through',
+        marginRight: 8,
+    },
+    discountedPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#e53935',
+    },
+    price: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    discountChip: {
+        backgroundColor: '#e53935',
+        marginLeft: 8,
+    },
+    discountChipText: {
+        color: '#fff',
+        fontSize: 12,
+    },
+    infoContainer: {
+        marginBottom: 12,
+    },
+    infoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 4,
     },
-    courseDate: {
+    infoText: {
         fontSize: 14,
         color: '#666',
+        marginLeft: -8,
+    },
+    teacherContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    teacherName: {
+        fontSize: 14,
+        color: '#666',
+        marginLeft: 8,
     },
 });
 

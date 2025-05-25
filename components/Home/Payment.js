@@ -1,34 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { Text, Surface, Button, Divider, useTheme } from 'react-native-paper';
 import { PaymentService } from '../../service/paymentServiec';
+import { useContext } from "react";
 import Apis, { authApis, endpoints } from "../../configs/Apis";
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 
 const PaymentScreen = ({ navigation, route }) => {
-  const { amount, orderId } = route.params;
+  const { amount, orderId, discount } = route.params;
   const [loading, setLoading] = useState(false);
-  const [order_id, SetOrderID] = useState()
+  const [order_id, SetOrderID] = useState();
   const courseId = route.params?.courseId;
-  console.log("CourseHande", courseId)
+  const user = useContext(MyUserContext);
+  const theme = useTheme();
+
+  const originalAmount = amount;
+  const discountedAmount = discount ? amount - (amount * discount / 100) : amount;
+
   const handlePayment = async () => {
-    
     try {
       setLoading(true);
 
       const order = await Apis.post(endpoints['order'], {
         course: courseId,
-        user: 7
-      },  {
+        user: user.id,
+      }, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log("Order", order.data)
       
-      // Call API to create payment URL
-      const response = await PaymentService.createPayment(amount,order.data.id);
+      const response = await PaymentService.createPayment(discountedAmount, order.data.id);
       
       if (response && response.status === 'success') {
-        // Navigate to WebView with payment URL
         navigation.navigate('VNPayWebView', {
           paymentUrl: response.payment_url,
           orderId: response.order_id || orderId
@@ -46,30 +50,51 @@ const PaymentScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Thanh toán đơn hàng</Text>
-      
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Mã đơn hàng:</Text>
-        <Text style={styles.value}>{orderId}</Text>
-      </View>
-      
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Số tiền:</Text>
-        <Text style={styles.value}>{amount} VNĐ</Text>
-      </View>
-      
-      <Button
-        title="Thanh toán qua VNPay"
-        onPress={handlePayment}
-        disabled={loading}
-      />
-      
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#0000ff" />
-          <Text style={styles.loadingText}>Đang tạo liên kết thanh toán...</Text>
+      <Surface style={styles.card}>
+        <Text style={styles.title}>Thanh toán đơn hàng</Text>
+        <Divider style={styles.divider} />
+        
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Mã đơn hàng</Text>
+          <Text style={styles.value}>{orderId}</Text>
         </View>
-      )}
+
+        {discount && (
+          <>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Giá gốc</Text>
+              <Text style={[styles.value, styles.originalPrice]}>
+                {originalAmount.toLocaleString('vi-VN')} VNĐ
+              </Text>
+            </View>
+            
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Giảm giá</Text>
+              <Text style={[styles.value, styles.discount]}>
+                -{discount}%
+              </Text>
+            </View>
+          </>
+        )}
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Tổng thanh toán</Text>
+          <Text style={[styles.value, styles.finalPrice]}>
+            {discountedAmount.toLocaleString('vi-VN')} VNĐ
+          </Text>
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={handlePayment}
+          loading={loading}
+          disabled={loading}
+          style={styles.paymentButton}
+          contentStyle={styles.paymentButtonContent}
+        >
+          Thanh toán qua VNPay
+        </Button>
+      </Surface>
     </View>
   );
 };
@@ -77,21 +102,28 @@ const PaymentScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  card: {
     padding: 20,
-    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  divider: {
     marginBottom: 20,
   },
   infoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15,
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   label: {
     fontSize: 16,
@@ -99,16 +131,27 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 16,
+    fontWeight: '600',
+  },
+  originalPrice: {
+    textDecorationLine: 'line-through',
+    color: '#999',
+  },
+  discount: {
+    color: '#e53935',
     fontWeight: 'bold',
   },
-  loadingContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  finalPrice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#e53935',
   },
-  loadingText: {
-    marginLeft: 10,
+  paymentButton: {
+    marginTop: 24,
+    borderRadius: 8,
+  },
+  paymentButtonContent: {
+    paddingVertical: 8,
   },
 });
 

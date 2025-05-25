@@ -19,7 +19,7 @@ import Payment from "./components/Home/Payment"
 import VNPayWebView from "./components/Home/VNPayWebView"
 import PaymentSuccess from "./components/Home/PaymentSuccessScreen"
 import PaymentFailed from "./components/Home/PaymentFailedScreen"
-
+import InforTeacher from "./components/Home/infoTeacher"
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +43,7 @@ const StackNavigator = () => {
       <Stack.Screen name="lessons" component={Lessons} options={{title: "Danh sách bài học"}} />
       <Stack.Screen name="course-details" component={CourseDetails} options={{title: "Chi tiết bài học"}} />
       <Stack.Screen name="apointment" component={Apointment} />
+      <Stack.Screen name="infoTeacher" component={InforTeacher} />
       <Stack.Screen name="payment" component={Payment} />
       <Stack.Screen name="VNPayWebView" component={VNPayWebView} />
       <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
