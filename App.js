@@ -20,6 +20,7 @@ import VNPayWebView from "./components/Home/VNPayWebView"
 import PaymentSuccess from "./components/Home/PaymentSuccessScreen"
 import PaymentFailed from "./components/Home/PaymentFailedScreen"
 import InforTeacher from "./components/Home/infoTeacher"
+import EditProfile from "./components/User/EditProfile";
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +49,7 @@ const StackNavigator = () => {
       <Stack.Screen name="VNPayWebView" component={VNPayWebView} />
       <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
       <Stack.Screen name="PaymentFailed" component={PaymentFailed} />
+     
       {/* <Stack.Screen name="myCourse" component={MyCourse} options={{title: "My Courses"}} /> */}
     </Stack.Navigator>
   );
@@ -62,6 +64,10 @@ const MyCourseStackScreen = () => (
     <MyCourseStack.Screen name="newfeeds" component={NewFeeds} />
   </MyCourseStack.Navigator>
 );
+
+const RootStack = createNativeStackNavigator();
+
+
 const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
   const user = useContext(MyUserContext);
@@ -76,6 +82,8 @@ const TabNavigator = () => {
       </>:<>
       <Tab.Screen name="profile" component={Profile} options={{title: "Tài khoản", tabBarIcon: () => <Icon size={30} source="account-plus" />}} />
       <Tab.Screen name="myCourse" component={MyCourseStackScreen} options={{ title: "My Course",tabBarIcon: () => <Icon size={30} source="account-plus" />}} />
+
+
       </>}
       
       
@@ -95,7 +103,11 @@ const App = () => {
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>
         <NavigationContainer>
-          <TabNavigator />
+          {/* <TabNavigator /> */}
+          <RootStack.Navigator screenOptions={{ headerShown: false }}>
+            <RootStack.Screen name="MainTabs" component={TabNavigator} />
+            <RootStack.Screen name="EditProfile" component={EditProfile} />
+          </RootStack.Navigator>
         </NavigationContainer>
       </MyDispatchContext.Provider>
     </MyUserContext.Provider>

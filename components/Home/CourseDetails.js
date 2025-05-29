@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Card,
@@ -42,13 +43,31 @@ const LessonDetails = ({ route }) => {
     const nav = useNavigation();
     const user = useContext(MyUserContext);
     const dispatch = useContext(MyDispatchContext);
+    const [refreshing, setRefreshing] = useState(false);
+
+  
+
+
+
+    // State
+    const [commentText, setCommentText] = useState('');
+    const [commentList, setCommentList] = useState([]);
+    const [replyText, setReplyText] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyingToReply, setReplyingToReply] = useState(null);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMoreComments, setHasMoreComments] = useState(true);
+    const [next, setNext] = useState()
+    const commentsPerPage = 5;
+
+
     
-    console.log("User Course detail", user)
-    // console.log('param', route.params);
+
     const loadLessons = async () => {
       try {
         const res = await Apis.get(endpoints['lessons'](courseId));
-        console.log('res', res.data);
+
         setLessons(res.data);
       } catch (err) {
         console.error('Lỗi khi tải chi tiết khóa học:', err);
@@ -62,7 +81,7 @@ const LessonDetails = ({ route }) => {
         loadLessons()
         setCourseDetails(res.data);
         setStudents(res.data.students)
-        console.log("student", res.data.students)
+
       } catch (e) {
         console.error(e);
       } finally {
@@ -75,81 +94,220 @@ const LessonDetails = ({ route }) => {
     function checkUserExists(userId, userList) {
       return userList?.some(user => user?.id === userId);
     }
+
+    const loadComments = async () => {
+      try {
+        setLoadingComments(true);
+        
+ 
+        let url = `${endpoints['comment'](courseId)}?page=${page}`;
+ 
+
+        const response = await Apis.get(url);
+        
+   
+
+        // Chuyển đổi dữ liệu thành cấu trúc phân cấp
+        const comments = response.data.results || [];
+
+        const commentMap = {};
+        const rootComments = [];
+
+        // Tạo map các comment theo id
+        comments.forEach(comment => {
+          commentMap[comment.id] = {
+            ...comment,
+            replies: []
+          };
+        });
+
+        // Sắp xếp comment vào cấu trúc phân cấp
+        comments.forEach(comment => {
+          if (comment.parent === null) {
+            rootComments.push(commentMap[comment.id]);
+          } else {
+            const parentComment = commentMap[comment.parent.id];
+            if (parentComment) {
+              parentComment.replies.push(commentMap[comment.id]);
+            }
+          }
+        });
+
+        setCommentList([...commentList, ...rootComments]);
+      
+        // setCommentList(rootComments);
+        if (response.data.next === null)
+          setHasMoreComments(false)
+      } catch (error) {
+        console.error('Error loading comments:', error);
+        setCommentList([]);
+      } finally {
+        setLoadingComments(false);
+      }
+    };
+    const loadMore = () => {
+      if (!loading && page > 0){
+
+        setPage(page + 1);
+      }
+        
+    }
     
 
     useEffect(() => {
       loadCourseDetails()
-      
+     
     }, [courseId]);
-    console.log('lesson',lessons)
-    console.log('userAdd', user)
-    // console.log('courseId',courseDetails);
-    console.log('courseDetails',courseDetails);
+    useEffect( () => {
+      loadComments();
+       const t = setTimeout(() => {
+          console.log("comment");
+        }, 1000);
+
+         return () => clearTimeout(t);
+    },[page])
+    // console.log('lesson',lessons)
+    // console.log('userAdd', user)
+    // // console.log('courseId',courseDetails);
+    // console.log('courseDetails',courseDetails);
         const theme = useTheme();
         const scrollRef = useRef(null);
       
-        // Dữ liệu khóa học
-        // const addStudent = async ()=>{
-        //   const token = await AsyncStorage.getItem('token');
-        //   // console.log('token', token)
-        //   let u = await authApis(token).post(endpoints['add-student'](courseId));
-        //   // console.info('Add Student',u.data);
-      
+    
 
-
-        // }
-      
-        const courseImages = [
-          'https://source.unsplash.com/600x400/?yoga',
-          'https://source.unsplash.com/600x400/?meditation',
-          'https://source.unsplash.com/600x400/?stretching',
-        ];
-      
-     
-      
-        const initialComments = [
-          {
-            id: 1,
-            name: 'Thu Hằng',
-            avatar: 'https://i.pravatar.cc/150?img=7',
-            content: 'Cô giáo dạy rất dễ hiểu và nhiệt tình. Cảm thấy cơ thể nhẹ nhõm hơn nhiều!',
-            time: '3 ngày trước',
-          },
-          {
-            id: 2,
-            name: 'Hoàng Minh',
-            avatar: 'https://i.pravatar.cc/150?img=8',
-            content: 'Bài học được sắp xếp khoa học, phù hợp với người mới. Rất hài lòng!',
-            time: '1 tuần trước',
-          },
-        ];
-      
-        // State
-        const [commentText, setCommentText] = useState('');
-        const [commentList, setCommentList] = useState(initialComments);
-      
-        // Thêm comment mới
-        const handleSendComment = () => {
-          const text = commentText.trim();
-          if (!text) return;
-      
-          const newComment = {
-            id: Date.now(),
-            name: 'Bạn',
-            avatar: 'https://i.pravatar.cc/150?u=me',
-            content: text,
-            time: 'Vừa xong',
-          };
-          setCommentList(prev => [...prev, newComment]);
-          setCommentText('');
-      
-          // Cuộn về cuối sau khi thêm
-          setTimeout(() => {
-            scrollRef.current?.scrollToEnd({ animated: true });
-          }, 100);
+        
+        const loadMoreComments = async () => {
+          if (loadingComments || !hasMoreComments) return;
+          
+          setLoadingComments(true);
+          try {
+          
+            
+            // setCommentList(prev => [...prev, ...newComments]);
+            setPage(prev => prev + 1);
+          } catch (error) {
+            console.error('Error loading more comments:', error);
+          } finally {
+            setLoadingComments(false);
+          }
         };
-      
-        // Render các phần
+
+        const handleReply = (commentId, replyId = null) => {
+          setReplyingTo(commentId);
+          setReplyingToReply(replyId);
+        };
+
+        const handleSendComment = async (text, parentId = null) => {
+          if (!text.trim()) return;
+
+          try {
+            console.log("parentId", parentId)
+            const token = await AsyncStorage.getItem('token');
+            if(!token){
+              nav.navigate('login')
+              return;
+            }
+            const response = await authApis(token).post(endpoints['comment'](courseId), {
+              content: text,
+              parent: parentId,
+              user: user.id
+            });
+
+            if (response.data) {
+              if (parentId) {
+                // Nếu là reply, thêm vào replies của comment cha
+                setCommentList(prev => prev.map(comment => {
+                  if (comment.id === parentId) {
+                    return {
+                      ...comment,
+                      replies: [...(comment.replies || []), response.data]
+                    };
+                  }
+                  return comment;
+                }));
+                setReplyText('');
+              } else {
+                // Nếu là comment mới, thêm vào đầu danh sách
+                setCommentList(prev => [response.data, ...prev]);
+                setCommentText('');
+                setTimeout(() => {
+                  scrollRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }
+
+              // Reset các state
+              setReplyingTo(null);
+              setReplyingToReply(null);
+            }
+          } catch (error) {
+            console.error('Error sending comment:', error);
+            Alert.alert('Lỗi', 'Không thể gửi bình luận. Vui lòng thử lại.');
+          }
+        };
+
+        const handleSendReply = () => {
+          if (!replyText.trim() || !replyingTo) return;
+          handleSendComment(replyText, replyingTo);
+        };
+
+        const renderReplyRecursive = (reply, commentId) => {
+          const isReplying = replyingTo === commentId && replyingToReply === reply.id;
+
+          return (
+            <View key={reply.id} style={styles.replyItem}>
+              <View style={styles.replyHeader}>
+                <Avatar.Image 
+                  size={32} 
+                  source={{ uri: user?.avatar || 'https://i.pravatar.cc/150' }} 
+                />
+                <View style={styles.replyInfo}>
+                  <Text style={styles.replyName}>{user?.first_name || 'Người dùng'}</Text>
+                  <Text style={styles.replyTime}>{formatDate(reply.created_at)}</Text>
+                </View>
+              </View>
+
+              <Text style={styles.replyContent}>{reply.content}</Text>
+
+              <View style={styles.replyButtonContainer}>
+                <IconButton
+                  icon="reply"
+                  size={16}
+                  onPress={() => handleReply(commentId, reply.id)}
+                  style={styles.replyButton}
+                />
+                <Text style={styles.replyButtonText}>Trả lời</Text>
+              </View>
+
+              {isReplying && (
+                <View style={styles.nestedReplyInputContainer}>
+                  <RNTextInput
+                    style={styles.replyInput}
+                    placeholder="Viết câu trả lời..."
+                    value={replyText}
+                    onChangeText={setReplyText}
+                    multiline
+                  />
+                  <IconButton
+                    icon="send"
+                    size={20}
+                    onPress={handleSendReply}
+                    disabled={!replyText.trim()}
+                    style={styles.sendReplyButton}
+                  />
+                </View>
+              )}
+
+              {reply.replies && reply.replies.length > 0 && (
+                <View style={styles.nestedRepliesContainer}>
+                  {reply.replies.map((childReply) =>
+                    renderReplyRecursive(childReply, commentId)
+                  )}
+                </View>
+              )}
+            </View>
+          );
+        };
+
         const renderHeader = () => (
           <View style={styles.headerContainer}>
             <Image 
@@ -276,8 +434,8 @@ const LessonDetails = ({ route }) => {
                 icon="chevron-right"
                 size={24}
                 onPress={() => {
-                  // Navigate to instructor details
                   if (courseDetails?.teacher) {
+                    console.log("Teacher: ",courseDetails?.teacher )
                     nav.navigate('infoTeacher', { instructor: courseDetails.teacher });
                   }
                 }}
@@ -337,7 +495,138 @@ const LessonDetails = ({ route }) => {
             </View>
           </View>
         );
-      
+
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffTime = Math.abs(now - date);
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+          const diffMinutes = Math.floor(diffTime / (1000 * 60));
+
+          if (diffDays > 0) {
+            return `${diffDays} ngày trước`;
+          } else if (diffHours > 0) {
+            return `${diffHours} giờ trước`;
+          } else if (diffMinutes > 0) {
+            return `${diffMinutes} phút trước`;
+          } else {
+            return 'Vừa xong';
+          }
+        };
+
+        const renderCommentSection = () => (
+          <View style={styles.commentSection}>
+            <Text style={styles.sectionTitle}>Bình luận</Text>
+            
+            {loadingComments ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#666" />
+              </View>
+            ) : (
+              <>
+                {(!commentList || commentList.length === 0) ? (
+                  <View style={styles.emptyStateContainer}>
+                    <IconButton
+                      icon="comment-outline"
+                      size={48}
+                      iconColor="#666"
+                    />
+                    <Text style={styles.emptyStateText}>Chưa có bình luận nào</Text>
+                    <Text style={styles.emptyStateSubText}>Hãy là người đầu tiên bình luận về khóa học này</Text>
+                  </View>
+                ) : (
+                  <>
+                    <View style={styles.commentList}>
+                      {Array.isArray(commentList) && commentList.map((comment) => (
+
+                        <Surface key={comment.id} style={styles.commentItem}>
+                          <View style={styles.commentHeader}>
+                            <Avatar.Image 
+                              size={40} 
+                              source={{ uri: comment.user?.avatar || 'https://i.pravatar.cc/150' }} 
+                            />
+                            <View style={styles.commentInfo}>
+                              <Text style={styles.commentName}>{comment.user?.first_name || 'Người dùng'}</Text>
+                              <Text style={styles.commentTime}>{formatDate(comment.created_at)}</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.commentContent}>{comment.content}</Text>
+                          
+                          <View style={styles.replyButtonContainer}>
+                            <IconButton
+                              icon="reply"
+                              size={20}
+                              onPress={() => handleReply(comment?.id)}
+                              style={styles.replyButton}
+                            />
+                            <Text style={styles.replyButtonText}>Trả lời</Text>
+                          </View>
+
+                          {comment.replies && comment.replies.length > 0 && (
+                            <View style={styles.repliesContainer}>
+                              {comment.replies.map((reply) => renderReplyRecursive(reply, comment.id))}
+                            </View>
+                          )}
+
+                          {replyingTo === comment.id && !replyingToReply && (
+                            <View style={styles.replyInputContainer}>
+                              <RNTextInput
+                                style={styles.replyInput}
+                                placeholder="Viết câu trả lời..."
+                                value={replyText}
+                                onChangeText={setReplyText}
+                                multiline
+                              />
+                              <IconButton
+                                icon="send"
+                                size={20}
+                                onPress={handleSendReply}
+                                disabled={!replyText.trim()}
+                                style={styles.sendReplyButton}
+                              />
+                            </View>
+                          )}
+                        </Surface>
+                      ))}
+                    </View>
+
+                    {hasMoreComments && commentList.length > 0 && (
+                      <Button
+                        mode="text"
+                        // onPress={loadMoreComments}
+                        onPress={loadMore}
+                        loading={loadingComments}
+                        style={styles.loadMoreButton}
+                      >
+                      
+                        {loadingComments ? 'Đang tải...' : 'Xem thêm bình luận'}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            <View style={styles.commentInputContainer}>
+              <RNTextInput
+                style={styles.commentInput}
+                placeholder="Viết bình luận của bạn..."
+                value={commentText}
+                onChangeText={setCommentText}
+                multiline
+              />
+              <IconButton
+                icon="send"
+                size={24}
+                onPress={() => handleSendComment(commentText)}
+                disabled={!commentText.trim()}
+                style={styles.sendButton}
+              />
+            </View>
+          </View>
+        );
+        
         return (
           <KeyboardAvoidingView
             style={styles.container}
@@ -348,6 +637,16 @@ const LessonDetails = ({ route }) => {
               ref={scrollRef}
               style={styles.scroll}
               contentContainerStyle={styles.scrollContent}
+              onScroll={({ nativeEvent }) => {
+                const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+                const paddingToBottom = 20;
+                if (layoutMeasurement.height + contentOffset.y >= 
+                    contentSize.height - paddingToBottom) {
+                  // loadMoreComments();
+                  // loadMore();
+                }
+              }}
+              scrollEventThrottle={400}
             >
               {renderHeader()}
               {renderPriceSection()}
@@ -360,6 +659,7 @@ const LessonDetails = ({ route }) => {
                 </Text>
               </View>
               {renderLessonList()}
+              {renderCommentSection()}
             </ScrollView>
           </KeyboardAvoidingView>
         );
@@ -615,5 +915,179 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginLeft: 4,
+  },
+  commentSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  commentList: {
+    gap: 16,
+    marginBottom: 16,
+  },
+  commentItem: {
+    padding: 16,
+    borderRadius: 12,
+    elevation: 2,
+    backgroundColor: '#fff',
+    flex: 1,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  commentInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  commentName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  commentTime: {
+    fontSize: 12,
+    color: '#666',
+  },
+  commentContent: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  replyButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  replyButton: {
+    margin: 0,
+    marginRight: 4,
+  },
+  replyButtonText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  repliesContainer: {
+    marginTop: 12,
+    gap: 12,
+  },
+  replyItem: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: '#e0e0e0',
+    flex: 1,
+  },
+  replyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  replyInfo: {
+    marginLeft: 8,
+    flex: 1,
+  },
+  replyName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  replyTime: {
+    fontSize: 12,
+    color: '#666',
+  },
+  replyContent: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+  nestedRepliesContainer: {
+    marginTop: 8,
+    gap: 8,
+  },
+  nestedReplyItem: {
+    backgroundColor: '#f0f2f5',
+    padding: 10,
+    borderRadius: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: '#e0e0e0',
+    flex: 1,
+  },
+  replyInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 12,
+  },
+  nestedReplyInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 8,
+  },
+  replyInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    maxHeight: 80,
+    paddingVertical: 8,
+  },
+  sendReplyButton: {
+    margin: 0,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginTop: 16,
+  },
+  commentInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    maxHeight: 100,
+    paddingVertical: 8,
+  },
+  sendButton: {
+    margin: 0,
+  },
+  loadMoreButton: {
+    marginTop: 8,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginVertical: 16,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 8,
+  },
+  emptyStateSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
   },
 });

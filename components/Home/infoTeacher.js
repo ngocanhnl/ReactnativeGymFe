@@ -1,31 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Image } from 'react-native';
 import { Text, Surface, IconButton, Divider, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import Apis, { endpoints } from "../../configs/Apis";
 const InfoTeacher = ({ route }) => {
   const { instructor } = route.params;
+  const [teacherProfile, setTeacherProfile] = useState()
+
   const navigation = useNavigation();
   const theme = useTheme();
 
-//   const renderHeader = () => (
-//     <View style={styles.headerContainer}>
-//       <Image 
-//         source={{ uri: instructor?.avatar || 'https://i.pravatar.cc/150' }} 
-//         style={styles.headerImage}
-//         resizeMode="cover"
-//       />
-//       <View style={styles.headerOverlay}>
-//         <IconButton
-//           icon="arrow-left"
-//           size={24}
-//           color="#fff"
-//           style={styles.backButton}
-//           onPress={() => navigation.goBack()}
-//         />
-//       </View>
-//     </View>
-//   );
+  const loadTeacherProfile = async ()=>{
+    try {
+      const res = await Apis.get(endpoints['teacher-profile'](instructor?.id))
+      console.log("Teacher profile ::: ", res.data)
+      setTeacherProfile(res.data)
+    } catch (error) {
+      console.log("Không thể tải dữ liệu giảng viên", error)
+    }
+  
+  } 
+
+  
+  useEffect(() => {
+    loadTeacherProfile();
+  }, []);
+
+
+
 
   const renderTeacherInfo = () => (
     <Surface style={styles.infoContainer}>
@@ -73,57 +75,99 @@ const InfoTeacher = ({ route }) => {
     </Surface>
   );
 
-  const renderExpertise = () => (
-    <Surface style={styles.expertiseContainer}>
-      <Text style={styles.sectionTitle}>Chuyên môn</Text>
-      <View style={styles.expertiseList}>
-        {['Lập trình Web', 'Mobile Development', 'UI/UX Design', 'Database'].map((skill, index) => (
-          <View key={index} style={styles.expertiseItem}>
-            <IconButton icon="check-circle" size={20} color={theme.colors.primary} />
-            <Text style={styles.expertiseText}>{skill}</Text>
-          </View>
-        ))}
-      </View>
-    </Surface>
-  );
+  // const renderExpertise = () => (
+  //   <Surface style={styles.expertiseContainer}>
+  //     <Text style={styles.sectionTitle}>Chuyên môn</Text>
+  //     <View style={styles.expertiseList}>
+  //       {['Lập trình Web', 'Mobile Development', 'UI/UX Design', 'Database'].map((skill, index) => (
+  //         <View key={index} style={styles.expertiseItem}>
+  //           <IconButton icon="check-circle" size={20} color={theme.colors.primary} />
+  //           <Text style={styles.expertiseText}>{skill}</Text>
+  //         </View>
+  //       ))}
+  //     </View>
+  //   </Surface>
+  // );
+  const renderExpertise = (certificate) => {
+    // Tách chuỗi certificate thành từng dòng, bỏ dấu gạch đầu dòng và khoảng trắng
+    const certifications = certificate
+      ? certificate.split('\n').map(line => line.replace(/^- /, '').trim()).filter(line => line !== '')
+      : [];
+  
+    return (
+      <Surface style={styles.expertiseContainer}>
+        <Text style={styles.sectionTitle}>Chuyên môn</Text>
+        <View style={styles.expertiseList}>
+          {certifications.map((cert, index) => (
+            <View key={index} style={styles.expertiseItem}>
+              <IconButton icon="check-circle" size={20} color={theme.colors.primary} />
+              <Text style={styles.expertiseText}>{cert}</Text>
+            </View>
+          ))}
+        </View>
+      </Surface>
+    );
+  };
 
-  const renderEducation = () => (
-    <Surface style={styles.educationContainer}>
-      <Text style={styles.sectionTitle}>Học vấn</Text>
-      <View style={styles.educationList}>
-        <View style={styles.educationItem}>
-          <View style={styles.educationIcon}>
-            <IconButton icon="school" size={24} color={theme.colors.primary} />
-          </View>
-          <View style={styles.educationInfo}>
-            <Text style={styles.educationDegree}>Thạc sĩ Công nghệ thông tin</Text>
-            <Text style={styles.educationSchool}>Đại học XYZ</Text>
-            <Text style={styles.educationYear}>2018 - 2020</Text>
+  // const renderEducation = () => (
+  //   <Surface style={styles.educationContainer}>
+  //     <Text style={styles.sectionTitle}>Học vấn</Text>
+  //     <View style={styles.educationList}>
+  //       <View style={styles.educationItem}>
+  //         <View style={styles.educationIcon}>
+  //           <IconButton icon="school" size={24} color={theme.colors.primary} />
+  //         </View>
+  //         <View style={styles.educationInfo}>
+  //           <Text style={styles.educationDegree}>Thạc sĩ Công nghệ thông tin</Text>
+  //           <Text style={styles.educationSchool}>Đại học XYZ</Text>
+  //           <Text style={styles.educationYear}>2018 - 2020</Text>
+  //         </View>
+  //       </View>
+  //       <Divider style={styles.divider} />
+  //       <View style={styles.educationItem}>
+  //         <View style={styles.educationIcon}>
+  //           <IconButton icon="school" size={24} color={theme.colors.primary} />
+  //         </View>
+  //         <View style={styles.educationInfo}>
+  //           <Text style={styles.educationDegree}>Cử nhân Công nghệ thông tin</Text>
+  //           <Text style={styles.educationSchool}>Đại học ABC</Text>
+  //           <Text style={styles.educationYear}>2014 - 2018</Text>
+  //         </View>
+  //       </View>
+  //     </View>
+  //   </Surface>
+  // );
+  const renderEducation = (degreeStr) => {
+    // Tách degree theo dấu gạch ngang
+    const [degreeTitle, degreeSchool] = degreeStr?.split(' - ') || [];
+  
+    return (
+      <Surface style={styles.educationContainer}>
+        <Text style={styles.sectionTitle}>Học vấn</Text>
+        <View style={styles.educationList}>
+          <View style={styles.educationItem}>
+            <View style={styles.educationIcon}>
+              <IconButton icon="school" size={24} color={theme.colors.primary} />
+            </View>
+            <View style={styles.educationInfo}>
+              <Text style={styles.educationDegree}>{degreeTitle || 'Chưa cập nhật'}</Text>
+              <Text style={styles.educationSchool}>{degreeSchool || ''}</Text>
+         
+            </View>
           </View>
         </View>
-        <Divider style={styles.divider} />
-        <View style={styles.educationItem}>
-          <View style={styles.educationIcon}>
-            <IconButton icon="school" size={24} color={theme.colors.primary} />
-          </View>
-          <View style={styles.educationInfo}>
-            <Text style={styles.educationDegree}>Cử nhân Công nghệ thông tin</Text>
-            <Text style={styles.educationSchool}>Đại học ABC</Text>
-            <Text style={styles.educationYear}>2014 - 2018</Text>
-          </View>
-        </View>
-      </View>
-    </Surface>
-  );
-
+      </Surface>
+    );
+  };
+  
   return (
     <View style={styles.container}>
       {/* {renderHeader()} */}
       <ScrollView style={styles.scrollView}>
         {renderTeacherInfo()}
         {renderBio()}
-        {renderExpertise()}
-        {renderEducation()}
+        {renderExpertise(teacherProfile?.certificate)}
+        {renderEducation(teacherProfile?.degree)}
       </ScrollView>
     </View>
   );

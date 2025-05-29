@@ -1,34 +1,3 @@
-// import { useContext } from "react";
-// import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
-// import { Text, View } from "react-native";
-// import MyStyles from "../../styles/MyStyles";
-// import { Button } from "react-native-paper";
-// import { useNavigation } from "@react-navigation/native";
-
-// const Profile = () => {
-//     const user = useContext(MyUserContext);
-//     const dispatch = useContext(MyDispatchContext);
-//     const nav = useNavigation();
-
-//     const logout = () => {
-//         dispatch({
-//             "type": "logout"
-//         });
-//         nav.navigate('index');
-//     }
-
-//     return (
-//         <View>
-//             <Text style={MyStyles.subject}>Chào {user.username}!</Text>
-//             <Button onPress={logout} mode="contained" style={MyStyles.m}>Đăng xuất</Button>
-//         </View>
-        
-//     )
-// }
-
-// export default Profile;
-
-
 import { useContext, useState } from "react";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { Text, View, StyleSheet, ScrollView, Image, TouchableOpacity, RefreshControl } from "react-native";
@@ -59,7 +28,7 @@ const Profile = () => {
     const [infoExpanded, setInfoExpanded] = useState(false);
     const [appointmentExpanded, setAppointmentExpanded] = useState(false);
     const [apoinment, setApoinment] = useState([]);
-     const [refreshing, setRefreshing] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -101,7 +70,6 @@ const Profile = () => {
     };
 
     const handleEditProfile = () => {
-        // Điều hướng đến trang chỉnh sửa hồ sơ
         nav.navigate('EditProfile');
     };
 
@@ -164,7 +132,14 @@ const Profile = () => {
                     
                     <View style={styles.profileInfo}>
                         <Text style={[MyStyles.subject, styles.profileName]}>Chào {user.first_name +" "+ user.last_name}!</Text>
-                        
+                        <Button 
+                            mode="outlined" 
+                            onPress={handleEditProfile}
+                            style={styles.editButton}
+                            icon="account-edit"
+                        >
+                            Chỉnh sửa thông tin
+                        </Button>
                     </View>
                 </View>
 
@@ -374,8 +349,8 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     editButton: {
-        borderRadius: 25,
-        paddingHorizontal: 16,
+        marginTop: 10,
+        borderRadius: 20,
     },
     shareButton: {
         marginLeft: 8,
