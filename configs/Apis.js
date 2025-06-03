@@ -2,7 +2,7 @@ import axios from "axios";
 
 // const BASE_URL = "http://10.0.2.2:8000/";
 // const BASE_URL = "http://192.168.100.9:8000/";
-const BASE_URL = "https://bd67-2001-ee0-4f42-2f20-98d0-6fad-f8ad-5324.ngrok-free.app/";
+const BASE_URL = "https://dec9-2001-ee0-4f42-2f20-4f3-348b-6c0-39f5.ngrok-free.app/";
 
 export const endpoints = {
     'categories': '/categories/',

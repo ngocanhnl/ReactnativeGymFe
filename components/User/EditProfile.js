@@ -16,7 +16,7 @@ const EditProfile = () => {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email || '',
-        phone: user.phone || '',
+        phone_number: user.phone_number || '',
         avatar: user.avatar || null,
     });
 
@@ -59,7 +59,7 @@ const EditProfile = () => {
             formDataToSend.append('first_name', formData.first_name);
             formDataToSend.append('last_name', formData.last_name);
             formDataToSend.append('email', formData.email);
-            formDataToSend.append('phone', formData.phone);
+            formDataToSend.append('phone_number', formData.phone_number);
 
             if (formData.avatar && formData.avatar !== user.avatar) {
                 const imageUri = formData.avatar;
@@ -145,8 +145,8 @@ const EditProfile = () => {
 
                     <TextInput
                         label="Số điện thoại"
-                        value={formData.phone}
-                        onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
+                        value={formData.phone_number}
+                        onChangeText={(text) => setFormData(prev => ({ ...prev, phone_number: text }))}
                         style={styles.input}
                         mode="outlined"
                         keyboardType="phone-pad"

@@ -42,14 +42,17 @@ const Profile = () => {
             const token = await AsyncStorage.getItem('token');
         //   const res = await Apis.get(endpoints['myApoinment'](user.id));
         const res = await authApis(token).get(endpoints['myApoinment'](user.id));
+        // console.log("res:", res.data);
             const formatted = res.data.map(item => ({
                 date: item.date,
                 teacherName: item.teacher.first_name,
                 time: item.time,
-                note: item.note
+                note: item.note,
+                studentName: item.student.first_name + " " + item.student.last_name
             }));
 
-            console.log("formatted:", formatted);
+            // console.log("formatted:", formatted);
+        
             setApoinment(formatted);
           
         } catch (err) {
@@ -61,7 +64,8 @@ const Profile = () => {
         loadApoinment();
       }, [user.id]);
 
-    
+      console.log("user:", user);
+      console.log("apoinment:", apoinment);
     const logout = () => {
         dispatch({
             "type": "logout"
@@ -161,7 +165,7 @@ const Profile = () => {
                                 </View>
                                 <View style={styles.infoRow}>
                                     <Text style={styles.infoLabel}>Số điện thoại:</Text>
-                                    <Text style={styles.infoValue}>{user.phone || 'Chưa cập nhật'}</Text>
+                                    <Text style={styles.infoValue}>{user.phone_number || 'Chưa cập nhật'}</Text>
                                 </View>
                                 <View style={styles.infoRow}>
                                     <Text style={styles.infoLabel}>Ngày tham gia:</Text>
@@ -230,7 +234,8 @@ const Profile = () => {
                                                 Thời gian: {appointment.time || 'Chưa xác định'}
                                             </Text>
                                             <Text style={styles.appointmentUser}>
-                                                Học viên: {user.first_name} {user.last_name}
+                                                {/* Học viên: {user.first_name} {user.last_name} */}
+                                                Học viên: {appointment.studentName}
                                             </Text>
                                             <Text style={styles.appointmentTeacher}>
                                                 Giáo viên: {appointment.teacherName}

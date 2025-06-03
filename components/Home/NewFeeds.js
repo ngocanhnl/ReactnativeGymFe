@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, StatusBar, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import Apis, { endpoints } from "../../configs/Apis";
@@ -51,7 +50,7 @@ export default function BulletinBoard ({route}){
           setLoading(true);
 
           let url = `${endpoints['news'](courseId)}?page=${page}`;
-          console.log("new url", url)
+          // console.log("new url", url)
 
           if (q) {
               url = `${url}&q=${q}`;
@@ -61,11 +60,11 @@ export default function BulletinBoard ({route}){
               url = `${url}&typeNews=${typeNews}`;
           }
 
-          console.info(url);
+          // console.info(url);
           let res = await Apis.get(url);
           // console.log("New1", res.data)
           setNews([...news, ...res.data.results]);
-          console.log("New1", res.data)
+          // console.log("New1", res.data)
           if (res.data.next === null)
               setPage(0);
       } catch (ex) {
@@ -94,6 +93,7 @@ useEffect(() => {
     if (!loading && page > 0)
         setPage(page + 1);
   }
+  // console.log("news", news)
 
 
   
@@ -170,55 +170,6 @@ useEffect(() => {
   };
 
   // Render individual post
-  // const renderPostItem = ({ item }) => (
-    
-  //   <Card key={`${item.id}-${item.created_at}`} style={styles.card}>
-  //     <Card.Content>
-  //       <View style={styles.authorContainer}>
-  //         <Avatar.Text size={36} label={item.avatar} />
-  //         <View style={styles.authorInfo}>
-  //           <Text style={styles.authorName}>{item.user?.first_name || item.author}</Text>
-  //           <Text style={styles.postDate}>{item.created_at || item.date}</Text>
-  //         </View>
-  //       </View>
-  //       <View style={styles.categoryChipContainer}>
-  //         {renderCategoryChip(item.type_news || item.category)}
-  //       </View>
-  //       <Title style={styles.postTitle}>{item.title}</Title>
-  //       <Paragraph numberOfLines={3}>{item.content}</Paragraph>
-  //     </Card.Content>
-      
-  //     {item.image && (
-  //       <Card.Cover 
-  //         source={{ uri: item.image }} 
-  //         style={styles.postImage}
-  //       />
-  //     )}
-      
-  //     {(item.category === 'event' || item.type_news === 'event') && (
-  //       <Card.Content>
-  //         <View style={styles.eventInfoRow}>
-  //           <IconButton icon="calendar" size={18} />
-  //           <Text>{item.date}</Text>
-  //           <IconButton icon="clock-outline" size={18} />
-  //           <Text>{item.time}</Text>
-  //         </View>
-  //         <View style={styles.eventInfoRow}>
-  //           <IconButton icon="map-marker" size={18} />
-  //           <Text>{item.location}</Text>
-  //         </View>
-  //       </Card.Content>
-  //     )}
-      
-  //     <Divider style={styles.divider} />
-  //     {(item.type_news === "event" || item.category === "event") && (
-  //       <Card.Actions>
-  //         <Button>Xem chi tiết</Button>
-  //         <Button mode="contained">Đăng ký</Button>
-  //       </Card.Actions>
-  //     )}
-  //   </Card>
-  // );
   const renderPostItem = ({ item }) => {
     // Xử lý định dạng ngày giờ
     const createdAt = item.created_at
@@ -236,7 +187,11 @@ useEffect(() => {
       <Card key={`${item.id}-${item.created_at}`} style={styles.card}>
         <Card.Content>
           <View style={styles.authorContainer}>
-            <Avatar.Text size={36} label={item.avatar} />
+            {item.user?.avatar ? (
+              <Avatar.Image size={36} source={{ uri: item.user.avatar }} />
+            ) : (
+              <Avatar.Text size={36} label={item.user?.first_name?.[0] || 'U'} />
+            )}
             <View style={styles.authorInfo}>
               <Text style={styles.authorName}>{item.user?.first_name || item.author}</Text>
               <Text style={styles.postDate}>{createdAt}</Text>
@@ -251,7 +206,7 @@ useEffect(() => {
   
         {item.image && (
           <Card.Cover 
-            source={{ uri: item.image }} 
+            source={{ uri: `https://res.cloudinary.com/darr5at86/${item.image}` }} 
             style={styles.postImage}
           />
         )}

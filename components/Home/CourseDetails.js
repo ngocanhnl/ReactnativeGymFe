@@ -156,6 +156,7 @@ const LessonDetails = ({ route }) => {
 
     useEffect(() => {
       loadCourseDetails()
+      
      
     }, [courseId]);
     useEffect( () => {
@@ -168,7 +169,7 @@ const LessonDetails = ({ route }) => {
     },[page])
     // console.log('lesson',lessons)
     // console.log('userAdd', user)
-    // // console.log('courseId',courseDetails);
+    console.log('courseId',courseDetails);
     // console.log('courseDetails',courseDetails);
         const theme = useTheme();
         const scrollRef = useRef(null);
@@ -425,7 +426,37 @@ const LessonDetails = ({ route }) => {
             </View>
           </View>
         );
-      
+
+        const getTimePeriod = (time) => {
+          const hour = parseInt(time.split(':')[0]);
+          return hour < 12 ? 'sáng' : 'chiều';
+        };
+
+        const renderSessionInfo = () => (
+          <View style={styles.sessionSection}>
+            <Text style={styles.sectionTitle}>Thông tin buổi học</Text>
+            {courseDetails?.sessions?.map((session, index) => (
+              <Surface key={index} style={styles.sessionItem}>
+                <View style={styles.sessionDetails}>
+                  <View style={styles.sessionTime}>
+                    <IconButton icon="clock-time-four-outline" size={24} color="#666" />
+                    <Text style={styles.sessionTimeValue}>
+                      {session.start_time.split(':').slice(0, 2).join(':')} - {session.end_time.split(':').slice(0, 2).join(':')}
+                      <Text style={styles.timePeriod}> ({getTimePeriod(session.start_time)})</Text>
+                    </Text>
+                  </View>
+                  {session.notes && (
+                    <View style={styles.sessionNotes}>
+                      <Text style={styles.sessionNotesLabel}>Ghi chú:</Text>
+                      <Text style={styles.sessionNotesValue}>{session.notes}</Text>
+                    </View>
+                  )}
+                </View>
+              </Surface>
+            ))}
+          </View>
+        );
+
         const renderInstructorSection = () => (
           <Surface style={styles.instructorSection}>
             <View style={styles.instructorHeader}>
@@ -651,6 +682,7 @@ const LessonDetails = ({ route }) => {
               {renderHeader()}
               {renderPriceSection()}
               {renderCourseInfo()}
+              {renderSessionInfo()}
               {renderInstructorSection()}
               <View style={styles.descriptionSection}>
                 <Text style={styles.sectionTitle}>Mô tả khóa học</Text>
@@ -1089,5 +1121,46 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 4,
+  },
+  sessionSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  sessionItem: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    elevation: 2,
+  },
+  sessionDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sessionTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sessionTimeValue: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  sessionNotes: {
+    marginLeft: 16,
+  },
+  sessionNotesLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  sessionNotesValue: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+  timePeriod: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
 });
