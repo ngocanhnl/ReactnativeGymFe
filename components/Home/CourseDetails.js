@@ -432,30 +432,75 @@ const LessonDetails = ({ route }) => {
           return hour < 12 ? 'sáng' : 'chiều';
         };
 
-        const renderSessionInfo = () => (
-          <View style={styles.sessionSection}>
-            <Text style={styles.sectionTitle}>Thông tin buổi học</Text>
-            {courseDetails?.sessions?.map((session, index) => (
-              <Surface key={index} style={styles.sessionItem}>
-                <View style={styles.sessionDetails}>
-                  <View style={styles.sessionTime}>
-                    <IconButton icon="clock-time-four-outline" size={24} color="#666" />
-                    <Text style={styles.sessionTimeValue}>
-                      {session.start_time.split(':').slice(0, 2).join(':')} - {session.end_time.split(':').slice(0, 2).join(':')}
-                      <Text style={styles.timePeriod}> ({getTimePeriod(session.start_time)})</Text>
-                    </Text>
+        const renderSessionInfo = () => {
+          // Sort sessions by date and time
+          const sortedSessions = [...(courseDetails?.sessions || [])].sort((a, b) => {
+            // If both sessions have dates, compare dates first
+            if (a.date && b.date) {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              
+              if (dateA.getTime() !== dateB.getTime()) {
+                return dateA - dateB;
+              }
+              
+              // If dates are the same, compare start times
+              return a.start_time.localeCompare(b.start_time);
+            }
+            
+            // If only one session has a date, prioritize the one with date
+            if (a.date) return -1;
+            if (b.date) return 1;
+            
+            // If neither has a date, compare by start time
+            return a.start_time.localeCompare(b.start_time);
+          });
+
+          return (
+            <View style={styles.sessionSection}>
+              <Text style={styles.sectionTitle}>Thông tin buổi học</Text>
+              {sortedSessions.map((session, index) => (
+                <Surface key={index} style={styles.sessionItem}>
+                  <View style={styles.sessionHeader}>
+                    <View style={styles.sessionNumber}>
+                      <Text style={styles.sessionNumberText}>Buổi {index + 1}</Text>
+                    </View>
+                    {session.date && (
+                      <Text style={styles.sessionDate}>
+                        {new Date(session.date).toLocaleDateString('vi-VN', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.sessionDetails}>
+                    <View style={styles.sessionTime}>
+                      <IconButton icon="clock-time-four-outline" size={24} color="#666" />
+                      <Text style={styles.sessionTimeValue}>
+                        {session.start_time.split(':').slice(0, 2).join(':')} - {session.end_time.split(':').slice(0, 2).join(':')}
+                        <Text style={styles.timePeriod}> ({getTimePeriod(session.start_time)})</Text>
+                      </Text>
+                    </View>
                   </View>
                   {session.notes && (
                     <View style={styles.sessionNotes}>
-                      <Text style={styles.sessionNotesLabel}>Ghi chú:</Text>
-                      <Text style={styles.sessionNotesValue}>{session.notes}</Text>
+                      <View style={styles.notesHeader}>
+                        
+                        <Text style={styles.notesTitle}>Ghi chú</Text>
+                      </View>
+                      <View style={styles.notesContent}>
+                        <Text style={styles.notesValue}>{session.notes}</Text>
+                      </View>
                     </View>
                   )}
-                </View>
-              </Surface>
-            ))}
-          </View>
-        );
+                </Surface>
+              ))}
+            </View>
+          );
+        };
 
         const renderInstructorSection = () => (
           <Surface style={styles.instructorSection}>
@@ -1132,9 +1177,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 2,
   },
-  sessionDetails: {
+  sessionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
+  },
+  sessionNumber: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  sessionNumberText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  sessionDate: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  sessionDetails: {
+    marginTop: 8,
   },
   sessionTime: {
     flexDirection: 'row',
@@ -1146,16 +1212,30 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sessionNotes: {
-    marginLeft: 16,
+    marginTop: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#007AFF',
   },
-  sessionNotesLabel: {
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  notesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 4,
+  },
+  notesContent: {
+    paddingLeft: 4,
+  },
+  notesValue: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
-  },
-  sessionNotesValue: {
-    fontSize: 14,
-    color: '#333',
     lineHeight: 20,
   },
   timePeriod: {

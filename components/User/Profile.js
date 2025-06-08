@@ -182,27 +182,43 @@ const Profile = () => {
 
                 <Divider />
 
-                {/* Phần hiển thị hoạt động gần đây */}
+                {/* Phần hiển thị chat hỗ trợ */}
                 <View style={styles.section}>
-                    <Title style={styles.sectionTitle}>Hoạt động gần đây</Title>
-                    
-                    {user.activities && user.activities.length > 0 ? (
-                        user.activities.map((activity, index) => (
-                            <Card key={index} style={styles.card}>
-                                <Card.Content>
-                                    <Title>{activity.title || 'Hoạt động'}</Title>
-                                    <Paragraph>{activity.description || 'Không có mô tả'}</Paragraph>
-                                    <Text style={styles.timeText}>{activity.time || 'Không xác định'}</Text>
-                                </Card.Content>
-                                <Card.Actions>
-                                    <Button onPress={() => console.log('Xem chi tiết')}>Xem chi tiết</Button>
-                                </Card.Actions>
-                            </Card>
-                        ))
+                    <Title style={styles.sectionTitle}>Hỗ trợ</Title>
+                    {user.role === 'tiep_tan' ? (
+                        <Card style={styles.card}>
+                            <Card.Content>
+                                <View style={styles.supportItem}>
+                                    <Icon name="account-group" size={24} color="#6200ee" style={styles.supportIcon} />
+                                    <View style={styles.supportContent}>
+                                        <Text style={styles.supportTitle}>Danh sách học viên</Text>
+                                        <Text style={styles.supportDescription}>Xem và chat với học viên</Text>
+                                    </View>
+                                    <IconButton
+                                        icon="chevron-right"
+                                        size={24}
+                                        onPress={() => nav.navigate('StudentList')}
+                                    />
+                                </View>
+                            </Card.Content>
+                        </Card>
                     ) : (
                         <Card style={styles.card}>
                             <Card.Content>
-                                <Paragraph>Chưa có hoạt động nào gần đây</Paragraph>
+                                <View style={styles.supportItem}>
+                                    <Icon name="chat-processing" size={24} color="#6200ee" style={styles.supportIcon} />
+                                    <View style={styles.supportContent}>
+                                        <Text style={styles.supportTitle}>Chat với hệ thống</Text>
+                                        <Text style={styles.supportDescription}>Nhận hỗ trợ trực tiếp từ đội ngũ của chúng tôi</Text>
+                                    </View>
+                                    <IconButton
+                                        icon="chevron-right"
+                                        size={24}
+                                        onPress={() => nav.navigate('SupportChat', {
+                                            userId: user.id
+                                        })}
+                                    />
+                                </View>
                             </Card.Content>
                         </Card>
                     )}
@@ -467,6 +483,27 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         textAlign: 'center',
         marginTop: 8,
+    },
+    supportItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    supportIcon: {
+        marginRight: 16,
+    },
+    supportContent: {
+        flex: 1,
+    },
+    supportTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    supportDescription: {
+        fontSize: 14,
+        color: '#666',
     },
 });
 

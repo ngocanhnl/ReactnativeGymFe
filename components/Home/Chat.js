@@ -8,6 +8,7 @@ import { getFirestore, collection, onSnapshot, query, orderBy, limit, startAfter
 import { addDoc, serverTimestamp as fsTimestamp } from 'firebase/firestore';
 import { useContext } from "react";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
+import { db, auth, app} from '../../firebase';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -22,10 +23,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const database = getDatabase(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// const auth = getAuth(app);
+// const db = getFirestore(app);
+
 
 const MESSAGES_PER_PAGE = 10;
 

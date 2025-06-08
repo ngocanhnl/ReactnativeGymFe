@@ -21,6 +21,8 @@ import PaymentSuccess from "./components/Home/PaymentSuccessScreen"
 import PaymentFailed from "./components/Home/PaymentFailedScreen"
 import InforTeacher from "./components/Home/infoTeacher"
 import EditProfile from "./components/User/EditProfile";
+import SupportChat from "./components/Support/SupportChat";
+import StudentList from "./components/Support/StudentList";
 
 const Stack = createNativeStackNavigator();
 
@@ -107,6 +109,8 @@ const App = () => {
           <RootStack.Navigator screenOptions={{ headerShown: false }}>
             <RootStack.Screen name="MainTabs" component={TabNavigator} />
             <RootStack.Screen name="EditProfile" component={EditProfile} />
+            <RootStack.Screen name="SupportChat" component={SupportChat} />
+            <RootStack.Screen name="StudentList" component={StudentList} />
           </RootStack.Navigator>
         </NavigationContainer>
       </MyDispatchContext.Provider>

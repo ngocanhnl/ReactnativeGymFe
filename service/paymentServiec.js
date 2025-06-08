@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://2580-2001-ee0-4f42-2f20-4f3-348b-6c0-39f5.ngrok-free.app';
+const API_URL = 'https://c5e8-2001-ee0-4f42-cff0-3c0f-a5d3-f65d-1353.ngrok-free.app';
 
 export const PaymentService = {
   createPayment: async (amount,order_id, bankCode = null) => {
