@@ -4,7 +4,7 @@ import { TextInput, IconButton, Text, Surface } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { Appbar } from 'react-native-paper';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, doc, getDocs } from 'firebase/firestore';
 import { useContext } from 'react';
 import { MyUserContext } from '../../configs/Contexts';
 import { db, auth, app} from '../../firebase';
@@ -45,6 +45,16 @@ const SupportChat = ({route}) => {
                 ...doc.data()
             }));
             setMessages(newMessages);
+
+            // Mark unread messages as read
+            snapshot.docs.forEach(async (doc) => {
+                const messageData = doc.data();
+                if (!messageData.isRead && messageData.sender !== user.id) {
+                    await updateDoc(doc.ref, {
+                        isRead: true
+                    });
+                }
+            });
         });
 
         return () => unsubscribe();
@@ -72,7 +82,7 @@ const SupportChat = ({route}) => {
                 sender: user.id,
                 senderName: `${user.first_name} ${user.last_name}`,
                 timestamp: serverTimestamp(),
-                isAdmin: false
+                isRead: false
             });
             setMessage('');
         } catch (error) {
@@ -117,7 +127,7 @@ const SupportChat = ({route}) => {
                                     msg.sender === user.id ? styles.sentBubble : styles.receivedBubble
                                 ]}
                             >
-                                {!msg.isAdmin && msg.sender !== user.id && (
+                                {msg.sender !== user.id && (
                                     <Text style={styles.senderName}>{msg.senderName}</Text>
                                 )}
                                 <Text 

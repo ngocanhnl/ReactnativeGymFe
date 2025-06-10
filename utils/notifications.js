@@ -41,7 +41,7 @@ export async function registerForPushNotificationsAsync(userToken) {
   // Gửi token về server Django
   try {
     await axios.post(
-      'https://c5e8-2001-ee0-4f42-cff0-3c0f-a5d3-f65d-1353.ngrok-free.app/api/expo-devices/',
+      'https://2420-2001-ee0-4f42-cff0-bc5a-f81c-c731-7fd3.ngrok-free.app/api/expo-devices/',
       { token: expoPushToken },
       {
         headers: {
